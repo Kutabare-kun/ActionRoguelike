@@ -2,6 +2,8 @@
 
 
 #include "SExplosiveBarrel.h"
+#include "DrawDebugHelpers.h"
+#include "SAttributeComponent.h"
 
 // Sets default values
 ASExplosiveBarrel::ASExplosiveBarrel()
@@ -10,16 +12,28 @@ ASExplosiveBarrel::ASExplosiveBarrel()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshComp");
-	MeshComp->SetCollisionProfileName("PhysicsActor");
+	MeshComp->SetSimulatePhysics(true);
 	RootComponent = MeshComp;
 
 	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>("RadialForceComp");
 	RadialForceComp->SetupAttachment(MeshComp);
 
+	// Leaving this on applies small constant force via component 'tick' (Optional)
+	RadialForceComp->SetAutoActivate(false);
+
+	RadialForceComp->Radius = 500.0f;
+	RadialForceComp->ImpulseStrength = 1000.0f;
+	// Optional, ignores 'Mass' of other objects (if false, the impulse strength will be much higher to push most objects depending on Mass)
 	RadialForceComp->bImpulseVelChange = true;
-	RadialForceComp->Radius = 1000.0f;
-	RadialForceComp->ImpulseStrength = 5000.0f;
-	RadialForceComp->DestructibleDamage = 500.0f;
+
+	RadialForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
+}
+
+void ASExplosiveBarrel::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	MeshComp->OnComponentHit.AddDynamic(this, &ASExplosiveBarrel::OnHit);
 }
 
 // Called when the game starts or when spawned
@@ -27,7 +41,6 @@ void ASExplosiveBarrel::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MeshComp->OnComponentHit.AddDynamic(this, &ASExplosiveBarrel::OnHit);
 }
 
 // Called every frame
@@ -39,6 +52,23 @@ void ASExplosiveBarrel::Tick(float DeltaTime)
 
 void ASExplosiveBarrel::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Hitted"));
-	RadialForceComp->FireImpulse();
+	if (OtherActor)
+	{
+		RadialForceComp->FireImpulse();
+
+		UE_LOG(LogTemp, Log, TEXT("OnHit in Explosive Barrel"));
+
+
+		// logs: "OtherActor: MyActor_1, at game time: 124.4"
+		UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s, at game time: %f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);
+
+		FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
+		DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.0f, true);
+
+
+		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
+
+		if (AttributeComp)
+			AttributeComp->ApplyHealthChange(-50);
+	}
 }

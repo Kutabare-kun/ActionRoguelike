@@ -2,6 +2,8 @@
 
 
 #include "SProjectileBase.h"
+
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -24,11 +26,19 @@ ASProjectileBase::ASProjectileBase()
 	MoveComp->ProjectileGravityScale = 0.0f;
 	MoveComp->InitialSpeed = 8000;
 
+	AudioCompFlight = CreateDefaultSubobject<UAudioComponent>("AudioCompFlight");
+	AudioCompFlight->SetupAttachment(RootComponent);
+
+	AudioCompExplode = CreateDefaultSubobject<UAudioComponent>("AudioCompExplode");
+	AudioCompExplode->bAutoActivate = false;
 }
 
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UGameplayStatics::PlayWorldCameraShake(this, ImpactShake, Hit.ImpactPoint, 1000.0f, 1000.0f);
+	UGameplayStatics::PlaySoundAtLocation(this, AudioCompExplode->GetSound(), GetActorLocation());
+
 	Explode();
 }
 

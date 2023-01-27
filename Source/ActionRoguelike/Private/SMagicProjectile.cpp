@@ -5,6 +5,7 @@
 
 #include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASMagicProjectile::ASMagicProjectile()
@@ -15,6 +16,7 @@ ASMagicProjectile::ASMagicProjectile()
 	DamageAmount = 20.0f;
 }
 
+
 void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor != GetInstigator())
@@ -24,6 +26,8 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 		{
 			// minus in front of DamageAmount to apply the change as damage, not healing
 			AttributeComp->ApplyHealthChange(-DamageAmount);
+
+
 
 			// Only explode when we hit something valid
 			Explode();

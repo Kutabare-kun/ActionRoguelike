@@ -64,11 +64,10 @@ void ASExplosiveBarrel::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 		FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
 		DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.0f, true);
-
-
+		
 		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 
 		if (AttributeComp)
-			AttributeComp->ApplyHealthChange(-50);
+			AttributeComp->ApplyHealthChange(GetInstigator(), -50);
 	}
 }

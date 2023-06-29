@@ -27,7 +27,7 @@ void ASPowerup_HealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	if (ensure(AttributeComp) && !AttributeComp->IsFullHealth())
 	{
 		// Only activate if healed successfully
-		if (AttributeComp->ApplyHealthChange(ApplyHealth))
+		if (AttributeComp->ApplyHealthChange(this, ApplyHealth))
 		{
 			HideAndCooldownPowerup();
 		}

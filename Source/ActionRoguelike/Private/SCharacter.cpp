@@ -32,9 +32,9 @@ ASCharacter::ASCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
-
+	
 	AttackAnimDelay = 0.2f;
-	TimeToHitParamName = "TimeToHit";
+	TimeToHitParamName = "HitPlayerTime";
 	HandSocketName = "Muzzle_01";
 }
 
@@ -228,7 +228,7 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 {
 	if (Delta < 0.0f)
 	{
-		GetMesh()->SetScalarParameterValueOnMaterials("HitPlayerTime", GetWorld()->TimeSeconds);
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
 	}
 
 	if (NewHealth <= 0.0f && Delta < 0.0f)

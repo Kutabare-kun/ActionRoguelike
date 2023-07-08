@@ -11,6 +11,8 @@
 #include "SAttributeComponent.h"
 #include "SWorldUserWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 ASAICharacter::ASAICharacter()
@@ -21,6 +23,9 @@ ASAICharacter::ASAICharacter()
 	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
+	
 	TimeToHitParamName = "TimeToHit";
 }
 
@@ -54,21 +59,25 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 		}
 		
 		GetMesh()->SetScalarParameterValueOnMaterials("HitPlayerTime", GetWorld()->TimeSeconds);
-	
+
+		// Died
 		if (NewHealth <= 0.f)
 		{
-			//	Stop BT
+			// Stop BT
 			AAIController* AIC = Cast<AAIController>(GetController());
 			if (AIC)
 			{
 				AIC->GetBrainComponent()->StopLogic("Killed");
 			}
 			
-			//	Ragdoll
+			// Ragdoll
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetCollisionProfileName("Ragdoll");
 
-			//	Set lifespan
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GetCharacterMovement()->DisableMovement();
+			
+			// Set lifespan
 			SetLifeSpan(10.f);
 		}
 	}

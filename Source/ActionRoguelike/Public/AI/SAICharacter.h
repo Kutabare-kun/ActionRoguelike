@@ -10,6 +10,7 @@
 class USWorldUserWidget;
 class UPawnSensingComponent;
 class USAttributeComponent;
+class USActionComponent;
 class UUserWidget;
 
 UCLASS()
@@ -37,12 +38,15 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USAttributeComponent* AtrributeComp;
-	
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USAttributeComponent* AtrributeComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+	
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 };

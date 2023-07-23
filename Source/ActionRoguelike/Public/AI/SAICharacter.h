@@ -33,7 +33,7 @@ protected:
 
 	void SetTargetActor(AActor* NewTarget);
 	
-	void PostInitializeComponents() override;
+	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
@@ -42,7 +42,7 @@ protected:
 	UPawnSensingComponent* PawnSensingComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USAttributeComponent* AtrributeComp;
+	USAttributeComponent* AttributeComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USActionComponent* ActionComp;

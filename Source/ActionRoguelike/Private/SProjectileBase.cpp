@@ -31,6 +31,8 @@ ASProjectileBase::ASProjectileBase()
 
 	AudioCompExplode = CreateDefaultSubobject<UAudioComponent>("AudioCompExplode");
 	AudioCompExplode->bAutoActivate = false;
+
+	bReplicates = true;
 }
 
 

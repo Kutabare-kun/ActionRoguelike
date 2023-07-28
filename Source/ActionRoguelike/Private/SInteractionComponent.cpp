@@ -13,7 +13,7 @@
 static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.DebugDrawInteraction"), false, TEXT("Enable Debug Lines for Interact Component."), ECVF_Cheat);
 
 
-// Sets default values for this component's properties
+
 USInteractionComponent::USInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -24,19 +24,21 @@ USInteractionComponent::USInteractionComponent()
 }
 
 
-// Called when the game starts
 void USInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 
-// Called every frame
 void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	FindBestInteractable();
+	
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+	if (MyPawn->IsLocallyControlled())
+	{
+		FindBestInteractable();
+	}
 }
 
 
@@ -119,7 +121,13 @@ void USInteractionComponent::FindBestInteractable()
 
 void USInteractionComponent::PrimaryInteract()
 {
-	if (FocusedActor == nullptr)
+	ServerInteract(FocusedActor);
+}
+
+
+void USInteractionComponent::ServerInteract_Implementation(AActor* InFocus)
+{
+	if (InFocus == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "No Focus Actor to interact.");
 		return;
@@ -127,7 +135,5 @@ void USInteractionComponent::PrimaryInteract()
 	
 	APawn* MyPawn = Cast<APawn>(GetOwner());
 
-	ISGameplayInterface::Execute_Interact(FocusedActor, MyPawn);
+	ISGameplayInterface::Execute_Interact(InFocus, MyPawn);
 }
-
-

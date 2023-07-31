@@ -11,7 +11,11 @@ static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("su.DamageMultiplie
 
 USAttributeComponent::USAttributeComponent()
 {
-	HealthMax = Health = 100;
+	HealthMax = 100;
+	Health = HealthMax;
+
+	Rage = 0;
+	RageMax = 100;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -40,7 +44,6 @@ float USAttributeComponent::GetHealth() const
 	return Health;
 }
 
-
 float USAttributeComponent::GetHealthMax() const
 {
 	return HealthMax;
@@ -54,16 +57,16 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 		return false;
 	}
 
-	if (Delta < 0.f)
+	if (Delta < 0.0f)
 	{
 		float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
 
 		Delta *= DamageMultiplier;
 	}
-	
+
 	float OldHealth = Health;
 
-	Health = FMath::Clamp(Health + Delta, 0, HealthMax);
+	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
 
 	float ActualDelta = Health - OldHealth;
 	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
@@ -73,7 +76,7 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 	}
 
 	// Died
-	if (ActualDelta < 0.f && Health == 0.f)
+	if (ActualDelta < 0.0f && Health == 0.0f)
 	{
 		ASGameModeBase* GM = GetWorld()->GetAuthGameMode<ASGameModeBase>();
 		if (GM)
@@ -81,7 +84,29 @@ bool USAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 			GM->OnActorKilled(GetOwner(), InstigatorActor);
 		}
 	}
-	
+
+	return ActualDelta != 0;
+}
+
+
+float USAttributeComponent::GetRage() const
+{
+	return Rage;
+}
+
+
+bool USAttributeComponent::ApplyRage(AActor* InstigatorActor, float Delta)
+{
+	float OldRage = Rage;
+
+	Rage = FMath::Clamp(Rage + Delta, 0.0f, RageMax);
+
+	float ActualDelta = Rage - OldRage;
+	if (ActualDelta != 0.0f)
+	{
+		OnRageChanged.Broadcast(InstigatorActor, this, Rage, ActualDelta);
+	}
+
 	return ActualDelta != 0;
 }
 
@@ -90,7 +115,7 @@ USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
 {
 	if (FromActor)
 	{
-		return FromActor->FindComponentByClass<USAttributeComponent>();
+		return Cast<USAttributeComponent>(FromActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 	}
 
 	return nullptr;
@@ -121,6 +146,5 @@ void USAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(USAttributeComponent, Health);
 	DOREPLIFETIME(USAttributeComponent, HealthMax);
-
 	//DOREPLIFETIME_CONDITION(USAttributeComponent, HealthMax, COND_InitialOnly);
 }

@@ -2,11 +2,9 @@
 
 
 #include "SActionComponent.h"
-
 #include "SAction.h"
 
 
-// Sets default values for this component's properties
 USActionComponent::USActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -15,7 +13,6 @@ USActionComponent::USActionComponent()
 }
 
 
-// Called when the game starts
 void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -27,7 +24,6 @@ void USActionComponent::BeginPlay()
 }
 
 
-// Called every frame
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -57,14 +53,28 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> Acti
 }
 
 
-void USActionComponent::RemoveAction(USAction* ActionRemove)
+void USActionComponent::RemoveAction(USAction* ActionToRemove)
 {
-	if (!ensure(ActionRemove && !ActionRemove->IsRunning()))
+	if (!ensure(ActionToRemove && !ActionToRemove->IsRunning()))
 	{
 		return;
 	}
-	
-	Actions.Remove(ActionRemove);
+
+	Actions.Remove(ActionToRemove);
+}
+
+
+USAction* USActionComponent::GetAction(TSubclassOf<USAction> ActionClass) const
+{
+	for (USAction* Action : Actions)
+	{
+		if (Action && Action->IsA(ActionClass))
+		{
+			return Action;
+		}
+	}
+
+	return nullptr;
 }
 
 
@@ -78,7 +88,6 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 			{
 				FString FailedMsg = FString::Printf(TEXT("Failed to run: %s"), *ActionName.ToString());
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
-				
 				continue;
 			}
 
@@ -87,7 +96,7 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 			{
 				ServerStartAction(Instigator, ActionName);
 			}
-			
+
 			Action->StartAction(Instigator);
 			return true;
 		}

@@ -30,7 +30,7 @@ ASCharacter::ASCharacter()
 
 	InteractionComp = CreateDefaultSubobject<USInteractionComponent>("InteractionComp");
 
-	AtrributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
+	AttributeComp = CreateDefaultSubobject<USAttributeComponent>("AttributeComp");
 
 	ActionComp = CreateDefaultSubobject<USActionComponent>("ActionComp");
 
@@ -45,7 +45,7 @@ void ASCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	AtrributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
 
@@ -80,7 +80,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ASCharacter::HealSelf(float Amount /* = 100 */)
 {
-	AtrributeComp->ApplyHealthChange(this, Amount);
+	AttributeComp->ApplyHealthChange(this, Amount);
 }
 
 
@@ -179,6 +179,10 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 	if (Delta < 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+
+		// Rage added equal to damage received (Abs to turn into positive rage number)
+		float RageDelta = FMath::Abs(Delta);
+		AttributeComp->ApplyRage(InstigatorActor, RageDelta);
 	}
 
 	if (NewHealth <= 0.0f && Delta < 0.0f)

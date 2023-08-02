@@ -26,6 +26,11 @@ void ASItemChest::Interact_Implementation(APawn* InstigatorPawn)
 	OnRep_LidOpened();
 }
 
+void ASItemChest::OnActorLoaded_Implementation()
+{
+	OnRep_LidOpened();
+}
+
 // Server: Must be use function in body where variable(bLidOpened) is changed
 // Client: Automatic use this function when variable(bLidOpened) is changed
 void ASItemChest::OnRep_LidOpened()

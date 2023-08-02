@@ -20,10 +20,12 @@ public:
 	float TargetPitch;
 
 	void Interact_Implementation(APawn* InstigatorPawn) override;
+
+	virtual void OnActorLoaded_Implementation() override;
 	
 protected:
 
-	UPROPERTY(ReplicatedUsing = "OnRep_LidOpened", BlueprintReadOnly) // RepNonify
+	UPROPERTY(ReplicatedUsing = "OnRep_LidOpened", BlueprintReadOnly, SaveGame) // RepNonify
 	bool bLidOpened;
 
 	UFUNCTION()

@@ -18,9 +18,6 @@ class ACTIONROGUELIKE_API ASPowerup_Credits : public ASPowerupActor
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	UStaticMeshComponent* MeshComp;
-
 	UPROPERTY(EditAnywhere, Category = "Credits")
 	int32 CreditsAmount;
 

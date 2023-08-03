@@ -10,15 +10,16 @@
 #include "EngineUtils.h"
 #include "DrawDebugHelpers.h"
 #include "SCharacter.h"
-#include "SGameplayInterface.h"
 #include "SPlayerState.h"
 #include "SSaveGame.h"
-#include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameStateBase.h"
+#include "SGameplayInterface.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 
-static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
+// Disabled by default while working on multiplayer...
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), false, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 
 
@@ -67,13 +68,14 @@ void ASGameModeBase::StartPlay()
 
 void ASGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
+	// Calling Before Super:: so we set variables before 'beginplayingstate' is called in PlayerController (which is where we instantiate UI)
 	ASPlayerState* PS = NewPlayer->GetPlayerState<ASPlayerState>();
-	if (PS)
+	if (ensure(PS))
 	{
 		PS->LoadPlayerState(CurrentSaveGame);
 	}
+
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
 
@@ -96,7 +98,7 @@ void ASGameModeBase::SpawnBotTimerElapsed()
 {
 	if (!CVarSpawnBots.GetValueOnGameThread())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Bot spawning disabled via cvar 'CVarSpawnBots'."));
+		//UE_LOG(LogTemp, Warning, TEXT("Bot spawning disabled via cvar 'CVarSpawnBots'."));
 		return;
 	}
 
@@ -204,7 +206,6 @@ void ASGameModeBase::OnPowerupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrap
 		int32 RandomClassIndex = FMath::RandRange(0, PowerupClasses.Num() - 1);
 		TSubclassOf<AActor> RandomPowerupClass = PowerupClasses[RandomClassIndex];
 
-		DrawDebugSphere(GetWorld(), PickedLocation, 50.0f, 20, FColor::Orange, false, 10.0f);
 		GetWorld()->SpawnActor<AActor>(RandomPowerupClass, PickedLocation, FRotator::ZeroRotator);
 
 		// Keep for distance checks
@@ -243,9 +244,12 @@ void ASGameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 
 	// Give Credits for kill
 	APawn* KillerPawn = Cast<APawn>(Killer);
-	if (KillerPawn)
+	// Don't credit kills of self
+	if (KillerPawn && KillerPawn != VictimActor)
 	{
-		if (ASPlayerState* PS = KillerPawn->GetPlayerState<ASPlayerState>()) // < can cast and check for nullptr within if-statement.
+		// Only Players will have a 'PlayerState' instance, bots have nullptr
+		ASPlayerState* PS = KillerPawn->GetPlayerState<ASPlayerState>();
+		if (PS) 
 		{
 			PS->AddCredits(CreditsPerKill);
 		}
@@ -267,7 +271,7 @@ void ASGameModeBase::WriteSaveGame()
 	}
 
 	CurrentSaveGame->SavedActors.Empty();
-	
+
 	// Iterate the entire world of actors
 	for (FActorIterator It(GetWorld()); It; ++It)
 	{
@@ -281,7 +285,7 @@ void ASGameModeBase::WriteSaveGame()
 		FActorSaveData ActorData;
 		ActorData.ActorFName = Actor->GetFName();
 		ActorData.Transform = Actor->GetActorTransform();
-
+		
 		// Pass the array to fill with data from Actor
 		FMemoryWriter MemWriter(ActorData.ByteData);
 
@@ -290,10 +294,10 @@ void ASGameModeBase::WriteSaveGame()
 		Ar.ArIsSaveGame = true;
 		// Converts Actor's SaveGame UPROPERTIES into binary array
 		Actor->Serialize(Ar);
-		
+
 		CurrentSaveGame->SavedActors.Add(ActorData);
 	}
-	
+
 	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
 }
 
@@ -308,9 +312,10 @@ void ASGameModeBase::LoadSaveGame()
 			UE_LOG(LogTemp, Warning, TEXT("Failed to load SaveGame Data."));
 			return;
 		}
-		
+
 		UE_LOG(LogTemp, Log, TEXT("Loaded SaveGame Data."));
-		
+
+
 		// Iterate the entire world of actors
 		for (FActorIterator It(GetWorld()); It; ++It)
 		{
@@ -328,14 +333,14 @@ void ASGameModeBase::LoadSaveGame()
 					Actor->SetActorTransform(ActorData.Transform);
 
 					FMemoryReader MemReader(ActorData.ByteData);
-					
+
 					FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
 					Ar.ArIsSaveGame = true;
 					// Convert binary array back into actor's variables
 					Actor->Serialize(Ar);
 
 					ISGameplayInterface::Execute_OnActorLoaded(Actor);
-					
+
 					break;
 				}
 			}

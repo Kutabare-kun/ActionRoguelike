@@ -21,9 +21,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Powerup")
 	TSubclassOf<USAction> ActionToGrant;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	UStaticMeshComponent* MeshComp;
-
 public:
 
 	void Interact_Implementation(APawn* InstigatorPawn) override;

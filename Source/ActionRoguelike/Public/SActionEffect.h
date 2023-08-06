@@ -35,6 +35,9 @@ protected:
 	void ExecutePeriodEffect(AActor* Instigator);
 
 public:
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	float GetTimeRemaining() const;
 	
 	USActionEffect();
 };

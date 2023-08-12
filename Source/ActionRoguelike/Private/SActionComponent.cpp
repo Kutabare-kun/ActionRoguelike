@@ -8,6 +8,9 @@
 #include "Net/UnrealNetwork.h"
 
 
+DECLARE_CYCLE_STAT(TEXT("StartActionByName"), STAT_StartActionByName, STATGROUP_STANFORD);
+
+
 USActionComponent::USActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -28,6 +31,22 @@ void USActionComponent::BeginPlay()
 			AddAction(GetOwner(), ActionClass);
 		}
 	}
+}
+
+
+void USActionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Stop all
+	TArray<USAction*> ActionCopy = Actions;
+	for (USAction* Action : ActionCopy)
+	{
+		if (Action && Action->IsRunning())
+		{
+			Action->StopAction(GetOwner());
+		}
+	}
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 
@@ -105,6 +124,8 @@ USAction* USActionComponent::GetAction(TSubclassOf<USAction> ActionClass) const
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 {
+	SCOPE_CYCLE_COUNTER(STAT_StartActionByName);
+	
 	for (USAction* Action : Actions)
 	{
 		if (Action && Action->ActionName == ActionName)
@@ -121,6 +142,9 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 			{
 				ServerStartAction(Instigator, ActionName);
 			}
+
+			// Bookmark for Unreal Insights
+			TRACE_BOOKMARK(TEXT("StartAction::%s"), *GetNameSafe(Action));
 
 			Action->StartAction(Instigator);
 			return true;

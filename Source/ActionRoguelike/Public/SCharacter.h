@@ -17,59 +17,58 @@ class UParticleSystem;
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 protected:
+    /* VisibleAnywhere = read-only, still useful to view in-editor and enforce a convention. */
+    UPROPERTY(VisibleAnywhere, Category = "Effects")
+    FName TimeToHitParamName;
 
-	/* VisibleAnywhere = read-only, still useful to view in-editor and enforce a convention. */
-	UPROPERTY(VisibleAnywhere, Category = "Effects")
-	FName TimeToHitParamName;
+    UPROPERTY(VisibleAnywhere)
+    USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere)
-	USpringArmComponent* SpringArmComp;
+    UPROPERTY(VisibleAnywhere)
+    UCameraComponent* CameraComp;
 
-	UPROPERTY(VisibleAnywhere)
-	UCameraComponent* CameraComp;
+    UPROPERTY(VisibleAnywhere)
+    USInteractionComponent* InteractionComp;
 
-	UPROPERTY(VisibleAnywhere)
-	USInteractionComponent* InteractionComp;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USAttributeComponent* AttributeComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USAttributeComponent* AttributeComp;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USActionComponent* ActionComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USActionComponent* ActionComp;
-	
-	void MoveForward(float Value);
+    void MoveForward(float Value);
 
-	void MoveRight(float Value);
+    void MoveRight(float Value);
 
-	void SprintStart();
+    void SprintStart();
 
-	void SprintStop();
+    void SprintStop();
 
-	void PrimaryAttack();
+    void PrimaryAttack();
 
-	void BlackHoleAttack();
+    void BlackHoleAttack();
 
-	void Dash();
+    void Dash();
 
-	void PrimaryInteract();
+    void PrimaryInteract();
 
-	FTransform ProjectileRotation(const FVector& From);
+    FTransform ProjectileRotation(const FVector& From);
 
-	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+    UFUNCTION()
+    void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
-	virtual void PostInitializeComponents() override;	
+    virtual void PostInitializeComponents() override;
 
-	virtual FVector GetPawnViewLocation() const override;
-	
+    virtual FVector GetPawnViewLocation() const override;
+
 public:
-	ASCharacter();
+    ASCharacter();
 
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(Exec)
-	void HealSelf(float Amount = 100);
+    UFUNCTION(Exec)
+    void HealSelf(float Amount = 100);
 };

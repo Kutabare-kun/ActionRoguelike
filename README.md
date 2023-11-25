@@ -18,15 +18,15 @@
 ![App Screenshot](Photo/Blackhole.png)
 
 ## Gameplay Ability System Action|Effect
-![App Screenshot](Photo/Gameplay Ability System Effect.png)
+![App Screenshot](Photo/GameplayAbilitySystemEffect.png)
 ![App Screenshot](Photo/GAS_Blackhole.png)
 ![App Screenshot](Photo/GAS_Sprint.png)
 
-## AI Behavior Tree with custome Task|Service
-![App Screenshot](Photo/AI Behavior Tree.png)
+## AI Behavior Tree with custom Task|Service
+![App Screenshot](Photo/AI_BehaviorTree.png)
 
 ## EQS Best HiddenSpot
-![App Screenshot](Photo/EQS HiddenSpot.png)
+![App Screenshot](Photo/EQS_HiddenSpot.png)
 
 ## Multiplayer
 ![App Screenshot](Photo/Multiplayer.png)

@@ -30,6 +30,3 @@
 
 ## Multiplayer
 ![App Screenshot](Photo/Multiplayer.png)
-
-## Certificate
-![App Screenshot](Photo/Certificate.png)
